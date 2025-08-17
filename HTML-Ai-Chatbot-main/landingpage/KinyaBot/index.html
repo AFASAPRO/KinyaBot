@@ -1,0 +1,594 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>KinyaBot Assistant</title>
+   <link rel="shortcut icon" href="logo.Ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+   <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+</head>
+<body>
+       <div id="loading-page">
+    <div class="loader-content">
+      <img src="logo.Ico.png" alt="Logo" class="loader-logo" />
+      <div class="loader-spinner"></div>
+      <div class="loader-text">Loading KinyaBot...</div><br><br><br><br>
+      <div class="loader-class">Powered by  <span class="gradient-text typed-afasa"></span>   </div>
+    </div>
+  </div>
+  
+  
+  <div class="container">
+    <div class="header">
+      <span>
+        <i class="fas fa-robot"></i>
+        KinyaBot Assistant
+      </span>
+      <button class="mode-btn" id="mode-toggle">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+    
+    <div class="chatbox" id="chatbox">
+      <!-- Messages will appear here -->
+    </div>
+    
+    <div class="input-area">
+      <button id="delete-btn" class="delete-btn">
+        <i class="fas fa-trash"></i>
+      </button>
+      <input type="text" id="chat-input" placeholder="Enter a prompt here">
+      <button id="send-btn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+    
+    <div class="disclaimer">
+      KinyaBot may display inaccurate info, including about people, so double-check its responses.
+    </div>
+  </div>
+
+  <script>
+    // Default to light mode on load
+    document.body.classList.add('light-mode');
+    document.querySelector('.container').classList.add('light-mode');
+    document.querySelector('.input-area').classList.add('light-mode');
+    // If you want assistant messages to default to light mode, add this after rendering them
+    const chatbox = document.getElementById('chatbox');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-btn');
+    const deleteButton = document.getElementById('delete-btn');
+    const modeToggle = document.getElementById('mode-toggle');
+    const container = document.querySelector('.container');
+    const inputArea = document.querySelector('.input-area');
+    const body = document.body;
+
+        // Hide loading page after window loads
+window.addEventListener('load', function() {
+  setTimeout(function() {
+    document.getElementById('loading-page').style.opacity = '0';
+    document.getElementById('loading-page').style.pointerEvents = 'none';
+  }, 2500);
+}); 
+
+    // Typing effect for 'Future'
+    function typeFutureAfasa() {
+      const el = document.querySelector('.typed-afasa');
+      const word = 'AFASA';
+      let i = 0;
+      function type() {
+        if (i <= word.length) {
+          el.textContent = word.slice(0, i);
+          i++;
+          setTimeout(type, 120);
+        } else {
+          setTimeout(() => {
+            el.textContent = '';
+            i = 0;
+            type();
+          }, 2000);
+        }
+      }
+      type();
+    }
+    document.addEventListener('DOMContentLoaded', typeFutureAfasa);
+
+    /**
+     * Smoothly fades out and removes the welcome card (greeting + help text + suggestions).
+     * This is triggered when user clicks a suggestion or sends the first message.
+     */
+    function removeWelcomeCard() {
+      const welcomeCard = document.querySelector('.welcome-card');
+      if (welcomeCard) {
+        welcomeCard.style.transition = 'all 0.5s ease';
+        welcomeCard.style.opacity = '0';
+        welcomeCard.style.transform = 'translateY(-20px)';
+        welcomeCard.style.maxHeight = '0';
+        welcomeCard.style.margin = '0';
+        welcomeCard.style.padding = '0';
+        welcomeCard.style.pointerEvents = 'none';
+        setTimeout(() => welcomeCard.remove());
+      }
+    }
+    // Toggle light/dark mode
+    modeToggle.addEventListener('click', () => {
+      body.classList.toggle('light-mode');
+      container.classList.toggle('light-mode');
+      inputArea.classList.toggle('light-mode');
+      
+      // Update all assistant messages
+      document.querySelectorAll('.assistant-message').forEach(msg => {
+        msg.classList.toggle('light-mode');
+      });
+      
+      // Toggle icon
+      const icon = modeToggle.querySelector('i');
+      if (icon.classList.contains('fa-moon')) {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    });
+
+    function displayMessage(text, isUser, suggestions = []) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('chat-message', isUser ? 'user-message' : 'assistant-message');
+      
+      // Apply light mode if active
+      if (!isUser && body.classList.contains('light-mode')) {
+        messageDiv.classList.add('light-mode');
+      }
+      
+      // Add animation
+      messageDiv.classList.add('animate__animated', 'animate__fadeIn');
+      
+      // Text content
+      messageDiv.textContent = text;
+      
+      // Add suggestion buttons if provided and not a user message
+      if (!isUser && suggestions.length > 0) {
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.classList.add('suggestions');
+        
+        // Icons for different suggestion types
+        const suggestionIcons = {
+          'How can I become': 'fas fa-graduation-cap',
+          'Create a roadmap': 'fas fa-map',
+          'Can you help me find': 'fas fa-search',
+          'Write a Javascript': 'fas fa-code',
+          'Tell me a joke': 'fas fa-laugh',
+          'What\'s the weather': 'fas fa-cloud-sun',
+          'Generate an image': 'fas fa-image',
+          'How can I help': 'fas fa-question-circle',
+          'default': 'fas fa-lightbulb'
+        };
+        suggestions.forEach(suggestion => {
+          const button = document.createElement('button');
+          
+          // Find appropriate icon or use default
+          let iconClass = suggestionIcons.default;
+          for (const [key, value] of Object.entries(suggestionIcons)) {
+            if (suggestion.startsWith(key)) {
+              iconClass = value;
+              break;
+            }
+          }
+          
+          // Create icon element
+          const icon = document.createElement('i');
+          icon.className = iconClass;
+          
+          // Add icon and text to button
+          button.appendChild(icon);
+          button.appendChild(document.createTextNode(' ' + suggestion));
+          
+          button.addEventListener('click', () => {
+            // Store the suggestion text
+            const selectedSuggestion = suggestion;
+
+            // Fade out greeting + suggestions (welcome card) if present
+            removeWelcomeCard();
+
+            // Fade out any other suggestion groups currently visible
+            const allSuggestionContainers = document.querySelectorAll('.suggestions');
+
+            // Visual effect for clicked button
+            button.style.transform = 'scale(0.95)';
+            button.style.opacity = '0.8';
+
+            // Animate suggestions out
+            allSuggestionContainers.forEach(container => {
+              container.style.transition = 'all 0.5s ease';
+              container.style.opacity = '0';
+              container.style.transform = 'translateY(-20px)';
+              container.style.maxHeight = '0';
+              container.style.margin = '0';
+              container.style.padding = '0';
+              container.style.pointerEvents = 'none';
+            });
+
+            setTimeout(() => {
+              allSuggestionContainers.forEach(container => container.remove());
+              chatInput.value = selectedSuggestion;
+              sendButton.click();
+            }, 500);
+          });
+          suggestionsDiv.appendChild(button);
+        });
+        
+        messageDiv.appendChild(suggestionsDiv);
+      }
+      
+      chatbox.appendChild(messageDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function displayTyping() {
+      const typingDiv = document.createElement('div');
+      typingDiv.classList.add('chat-message', 'assistant-message', 'typing-message');
+      
+      // Apply light mode if active
+      if (body.classList.contains('light-mode')) {
+        typingDiv.classList.add('light-mode');
+      }
+      
+      const typingBubble = document.createElement('div');
+      typingBubble.classList.add('typing-bubble');
+      
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('typing-dot');
+        typingBubble.appendChild(dot);
+      }
+      
+      typingDiv.appendChild(typingBubble);
+      chatbox.appendChild(typingDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+      
+      return typingDiv;
+    }
+
+    async function callApi(apiUrl, prompt) {
+      chatInput.value = "";
+      chatInput.disabled = true;
+      sendButton.disabled = true;
+      deleteButton.disabled = true;
+
+      // Add animation to send button
+      sendButton.classList.add('animate__animated', 'animate__bounceOut');
+      setTimeout(() => {
+        sendButton.classList.remove('animate__animated', 'animate__bounceOut');
+      }, 500);
+
+      const typingElem = displayTyping();
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({prompt})
+        });
+        const data = await response.json();
+
+        typingElem.remove();
+
+        chatInput.disabled = false;
+        sendButton.disabled = false;
+        deleteButton.disabled = false;
+        chatInput.focus();
+
+        // Add animation to send button when enabled
+        sendButton.classList.add('animate__animated', 'animate__bounceIn');
+        setTimeout(() => {
+          sendButton.classList.remove('animate__animated', 'animate__bounceIn');
+        }, 500);
+
+        if (data.status === 'success') {
+          // Progressive reveal for AI responses
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('chat-message', 'assistant-message');
+          
+          
+          // Add to chatbox immediately but empty
+          chatbox.appendChild(messageDiv);
+          chatbox.scrollTop = chatbox.scrollHeight;
+          
+          // Progressive typing effect
+          const text = data.text;
+          let charIndex = 0;
+          const typingSpeed = 12; // ms per character
+          
+          const typeWriter = () => {
+            if (charIndex < text.length) {
+              messageDiv.textContent += text.charAt(charIndex);
+              charIndex++;
+              chatbox.scrollTop = chatbox.scrollHeight;
+              setTimeout(typeWriter, typingSpeed);
+            } else {
+              // Add suggestion buttons after text is fully typed
+              if (data.suggestions && data.suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.classList.add('suggestions', 'animate__animated', 'animate__fadeIn');
+                
+                // Icons for different suggestion types
+                const suggestionIcons = {
+                  'How can I become': 'fas fa-graduation-cap',
+                  'Create a roadmap': 'fas fa-map',
+                  'Can you help me find': 'fas fa-search',
+                  'Write a Javascript': 'fas fa-code',
+                  'Tell me a joke': 'fas fa-laugh',
+                  'What\'s the weather': 'fas fa-cloud-sun',
+                  'Generate an image': 'fas fa-image',
+                  'How can I help': 'fas fa-question-circle',
+                  'default': 'fas fa-lightbulb'
+                };
+                
+                data.suggestions.forEach(suggestion => {
+                  const button = document.createElement('button');
+                  
+                  // Find appropriate icon or use default
+                  let iconClass = suggestionIcons.default;
+                  for (const [key, value] of Object.entries(suggestionIcons)) {
+                    if (suggestion.startsWith(key)) {
+                      iconClass = value;
+                      break;
+                    }
+                  }
+                  
+                  // Create icon element
+                  const icon = document.createElement('i');
+                  icon.className = iconClass;
+                  
+                  // Add icon and text to button
+                  button.appendChild(icon);
+                  button.appendChild(document.createTextNode(' ' + suggestion));
+                  
+                  button.addEventListener('click', () => {
+                    // Store the selected suggestion
+                    const selectedSuggestion = suggestion;
+                    
+                    // Fade out greeting + suggestions (welcome card) if present
+                    removeWelcomeCard();
+                    
+                    // Fade out any suggestion groups currently visible
+                    const allSuggestionContainers = document.querySelectorAll('.suggestions');
+                    
+                    // Visual effect for clicked button
+                    button.style.transform = 'scale(0.95)';
+                    button.style.opacity = '0.8';
+                    
+                    // Animate suggestions out
+                    allSuggestionContainers.forEach(container => {
+                      container.style.transition = 'all 0.5s ease';
+                      container.style.opacity = '0';
+                      container.style.transform = 'translateY(-20px)';
+                      container.style.maxHeight = '0';
+                      container.style.margin = '0';
+                      container.style.padding = '0';
+                      container.style.pointerEvents = 'none';
+                    });
+                    
+                    // After animation completes, remove all suggestion containers
+                    setTimeout(() => {
+                      allSuggestionContainers.forEach(container => {
+                        container.remove();
+                      });
+                      
+                      // Set the input value to the selected suggestion
+                      chatInput.value = selectedSuggestion;
+                      
+                      // Trigger the send button click
+                      sendButton.click();
+                    }, 500);
+                  });
+                  suggestionsDiv.appendChild(button);
+                });
+                
+                messageDiv.appendChild(suggestionsDiv);
+                chatbox.scrollTop = chatbox.scrollHeight;
+              }
+            }
+          };
+          
+          typeWriter();
+        } else {
+          displayMessage('❌ An error occurred. Please try again.', false);
+        }
+      } catch (error) {
+        console.error(error);
+        typingElem.remove();
+        displayMessage('❌ An error occurred. Please try again.', false);
+        chatInput.disabled = false;
+        sendButton.disabled = false;
+        deleteButton.disabled = false;
+      }
+    }
+
+    // Welcome message with animation delay
+    setTimeout(() => {
+      const welcomeDiv = document.createElement('div');
+      welcomeDiv.classList.add('chat-message', 'assistant-message');
+      
+      // Mark as a transparent, centered welcome card
+      welcomeDiv.classList.add('welcome-card');
+      
+      // Apply light mode if active
+      if (body.classList.contains('light-mode')) {
+        welcomeDiv.classList.add('light-mode');
+      }
+      
+      // Add animation
+      welcomeDiv.classList.add('animate__animated', 'animate__fadeIn');
+      
+      // Create personalized greeting with colored name
+      const greeting = document.createElement('div');
+      greeting.innerHTML = '<span class="greeting-text">Hello, <span class="user-name">AFASA</span></span>';
+      welcomeDiv.appendChild(greeting);
+      
+      // Add help text
+      const helpText = document.createElement('div');
+      helpText.textContent = "How Can I help you today ?";
+      helpText.classList.add('help-text');
+      welcomeDiv.appendChild(helpText);
+      
+      // Add suggestions
+      const suggestions = [
+        "How can I become a FullStack Developer in 2025", 
+        "Create a roadmap to learn ReactJs in 2025", 
+        "Can you help me find the latest news on Web Development", 
+        "Write a Javascript code to print the even numbers in an array"
+      ];
+      
+      const suggestionsDiv = document.createElement('div');
+      suggestionsDiv.classList.add('suggestions'); // styled as centered grid in CSS
+      
+      // Icons for different suggestion types
+      const suggestionIcons = {
+        'How can I become': 'fas fa-graduation-cap',
+        'Create a roadmap': 'fas fa-map',
+        'Can you help me find': 'fas fa-search',
+        'Write a Javascript': 'fas fa-code',
+        'default': 'fas fa-lightbulb'
+      };
+      
+      suggestions.forEach(suggestion => {
+        const button = document.createElement('button');
+        
+        // Find appropriate icon or use default
+        let iconClass = suggestionIcons.default;
+        for (const [key, value] of Object.entries(suggestionIcons)) {
+          if (suggestion.startsWith(key)) {
+            iconClass = value;
+            break;
+          }
+        }
+        
+        // Create icon element
+        const icon = document.createElement('i');
+        icon.className = iconClass;
+        
+        // Add icon and text to button
+        button.appendChild(icon);
+        button.appendChild(document.createTextNode(' ' + suggestion));
+        
+        button.addEventListener('click', () => {
+          // Store the selected suggestion
+          const selectedSuggestion = suggestion;
+          
+          // Find all suggestion containers
+          const allSuggestionContainers = document.querySelectorAll('.suggestions');
+          
+          // Create a visual effect for the clicked button
+          button.style.transform = 'scale(0.95)';
+          button.style.opacity = '0.8';
+          
+          // Manually animate each suggestion container
+          allSuggestionContainers.forEach(container => {
+            container.style.transition = 'all 0.5s ease';
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(-20px)';
+            container.style.maxHeight = '0';
+            container.style.margin = '0';
+            container.style.padding = '0';
+            container.style.pointerEvents = 'none';
+          });
+          
+          // After animation completes, remove all suggestion containers
+          setTimeout(() => {
+            allSuggestionContainers.forEach(container => {
+              container.remove();
+            });
+            
+            // Set the input value to the selected suggestion
+            chatInput.value = selectedSuggestion;
+            
+            // Trigger the send button click
+            sendButton.click();
+          }, 500);
+        });
+        suggestionsDiv.appendChild(button);
+      });
+      
+      welcomeDiv.appendChild(suggestionsDiv);
+      chatbox.appendChild(welcomeDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }, 800);
+
+    chatInput.focus();
+
+    // Add event listener for Enter key
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendButton.click();
+      }
+    });
+
+    // Add animation to input field on focus
+    chatInput.addEventListener('focus', () => {
+      chatInput.classList.add('animate__animated', 'animate__pulse');
+      setTimeout(() => {
+        chatInput.classList.remove('animate__animated', 'animate__pulse');
+      }, 500);
+    });
+
+    sendButton.addEventListener('click', async () => {
+      const message = chatInput.value.trim();
+      if(!message) return;
+
+      // If the user starts chat, fade out the welcome card (greeting + suggestions)
+      removeWelcomeCard();
+
+      displayMessage(message, true);
+      chatInput.value = '';
+
+      const apiUrl = message.startsWith('/image') ? 
+        'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQm5IZkJDMlNyYUVUTjIyZVN3UWFNX3BFTU85SWpCM2NUMUk3T2dxejhLSzBhNWNMMXNzZlp3c09BSTR6YW1Sc1BmdGNTVk1GY0liT1RoWDZZX1lNZlZ0Z1dqd3c9PQ==' : 
+        'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5IZkJDMlNyYUVUTjIyZVN3UWFNX3BFTU85SWpCM2NUMUk3T2dxejhLSzBhNWNMMXNzZlp3c09BSTR6YW1Sc1BmdGNTVk1GY0liT1RoWDZZX1lNZlZ0Z1dqd3c9PQ==';
+
+      callApi(apiUrl, message);
+    });
+
+    // Delete last message with animation
+    deleteButton.addEventListener('click', () => {
+      const messages = chatbox.querySelectorAll('.chat-message');
+      if(messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        lastMessage.classList.add('animate__animated', 'animate__fadeOutDown');
+        
+        // Add animation to delete button
+        deleteButton.classList.add('animate__animated', 'animate__headShake');
+        
+        setTimeout(() => {
+          lastMessage.remove();
+          deleteButton.classList.remove('animate__animated', 'animate__headShake');
+        }, 500);
+      }
+    });
+    // script section
+const adjustHeight = () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  
+  // Ensure chatbox takes exactly the right amount of space
+  const chatbox = document.getElementById('chatbox');
+  const header = document.querySelector('.header');
+  const inputArea = document.querySelector('.input-area');
+  const disclaimer = document.querySelector('.disclaimer');
+  
+  const availableHeight = window.innerHeight - header.offsetHeight - inputArea.offsetHeight - disclaimer.offsetHeight;
+  chatbox.style.height = `${availableHeight}px`;
+};
+
+// Run on page load
+adjustHeight();
+
+// Run on resize
+window.addEventListener('resize', adjustHeight);
+
+  </script>
+</body>
+</html>
+

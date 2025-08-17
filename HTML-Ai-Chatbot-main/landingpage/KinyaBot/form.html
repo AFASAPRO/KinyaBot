@@ -1,0 +1,315 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KinyaBot Auth </title>
+  <link rel="shortcut icon" href="logo.Ico.png" type="image/x-icon" />
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.0/css/all.min.css">
+  <style>
+    /* Root Design Variables */
+    :root {
+      --primary: #6366f1;
+      --primary-gradient-start: #6366f1;
+      --primary-gradient-end: #a855f7;
+      --secondary: #ec4899;
+      --background: #ffffff;
+      --text-dark: #222;
+      --muted: #6b7280;
+      --input-bg: #f9fafb;
+      --border: #e5e7eb;
+      --radius: 12px;
+      --shadow: 0 10px 25px rgba(0,0,0,0.08);
+      --transition: all 0.35s ease-in-out;
+    }
+
+    body.dark {
+      --background: #121212;
+      --text-dark: #f9fafb;
+      --input-bg: #1f1f1f;
+      --border: #333;
+      --shadow: 0 10px 25px rgba(255,255,255,0.08);
+    }
+
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', sans-serif;
+    }
+
+    body {
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      min-height: 100vh;
+      background: var(--background);
+      color: var(--text-dark);
+      transition: var(--transition);
+    }
+
+    /* Logo and toggle bar */
+    .top-bar {
+      position: absolute;
+      top: 20px;
+      left: 20px;
+      right: 20px;
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 8px;
+    }
+
+    .logo img {
+      height: 40px;
+    }
+
+    .logo span {
+      font-weight: 700;
+      font-size: 18px;
+      color: var(--primary);
+    }
+
+    .toggle-mode {
+      background: none;
+      border: none;
+      font-size: 20px;
+      cursor: pointer;
+      color: var(--primary);
+      transition: var(--transition);
+    }
+
+    .auth-container {
+      background: #fff;
+      box-shadow: var(--shadow);
+      border-radius: var(--radius);
+      overflow: hidden;
+      width: 420px;
+      max-width: 95%;
+      transition: var(--transition);
+    }
+
+    body.dark .auth-container {
+      background: #1e1e1e;
+    }
+
+    .tabs {
+      display: flex;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .tab {
+      flex: 1;
+      text-align: center;
+      padding: 16px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+
+    .tab.active {
+      background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+      color: #fff;
+      border-radius: var(--radius) var(--radius) 0 0;
+    }
+
+    .form {
+      padding: 30px;
+      display: none;
+      animation: fadeIn 0.5s ease-in-out;
+    }
+
+    .form.active {
+      display: block;
+    }
+
+    .form h2 {
+      margin-bottom: 20px;
+      text-align: center;
+      color: var(--primary);
+    }
+
+    .form input {
+      width: 100%;
+      padding: 14px;
+      margin: 10px 0;
+      border-radius: var(--radius);
+      border: 1px solid var(--border);
+      background: var(--input-bg);
+      transition: var(--transition);
+      color: var(--text-dark);
+    }
+
+    .form input:focus {
+      border-color: var(--primary);
+      box-shadow: 0 0 8px rgba(99, 102, 241, 0.3);
+      outline: none;
+    }
+
+    .btn {
+      width: 100%;
+      padding: 14px;
+      margin-top: 15px;
+      border: none;
+      border-radius: var(--radius);
+      background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+      color: #fff;
+      font-weight: 600;
+      cursor: pointer;
+      transition: var(--transition);
+    }
+    .btn a{
+      text-decoration: none;
+      color: #fff;
+      font-weight: 600;
+    }
+
+    .btn:hover {
+      opacity: 0.9;
+      transform: translateY(-2px);
+    }
+
+    .divider {
+      text-align: center;
+      margin: 20px 0;
+      font-size: 14px;
+      color: var(--muted);
+      position: relative;
+    }
+
+    .divider::before, .divider::after {
+      content: '';
+      position: absolute;
+      top: 50%;
+      width: 40%;
+      height: 1px;
+      background: var(--border);
+    }
+
+    .divider::before { left: 0; }
+    .divider::after { right: 0; }
+
+    .social-login {
+      display: grid;
+      gap: 12px;
+    }
+
+    .social-btn {
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      border: 1px solid var(--border);
+      padding: 12px;
+      border-radius: var(--radius);
+      background: #fff;
+      cursor: pointer;
+      font-weight: 500;
+      transition: var(--transition);
+    }
+
+    body.dark .social-btn {
+      background: #2a2a2a;
+      color: #fff;
+    }
+
+    .social-btn i { font-size: 18px; }
+    .social-btn.google i { color: #ea4335; }
+    .social-btn.microsoft i { color: #0078d7; }
+    .social-btn.github i { color: #333; }
+    .social-btn.facebook i { color: #1877f2; }
+
+    .social-btn:hover {
+      background: var(--input-bg);
+      transform: translateY(-2px);
+    }
+
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }/* Responsive */
+@media(max-width:600px){
+  .haha{
+    display: none;
+  }
+}
+
+  </style>
+</head>
+<body>
+  <!-- Top bar with logo + dark mode toggle -->
+  <div class="top-bar">
+    <div class="logo">
+      <img src="logo.Ico.png" alt="Kinyabot Logo" class="haha">
+
+      <span class="haha">Kinyabot</span>
+    </div>
+    <button class="toggle-mode" id="modeToggle"><i class="fa-solid fa-moon"></i></button>
+  </div>
+
+  <div class="auth-container">
+    <div class="tabs">
+      <div class="tab active" onclick="showForm('login')">Login</div>
+      <div class="tab" onclick="showForm('register')">Register</div>
+    </div>
+
+    <!-- Login Form -->
+    <form class="form active" id="login">
+      <h2>Welcome Back</h2>
+      <input type="text" placeholder="Email Or Username" required>
+      <input type="password" placeholder="Password" required>
+      <button class="btn" type="submit"> <a href="./index.html" type="submit">Login</a></button>
+
+      <div class="divider">or continue with</div>
+
+      <div class="social-login">
+        <div class="social-btn google"><i class="fab fa-google"></i> Continue with Google</div>
+        <div class="social-btn microsoft"><i class="fab fa-microsoft"></i> Continue with Microsoft</div>
+        <div class="social-btn github"><i class="fa fa-phone"></i> Continue with Phone</div>
+        <div class="social-btn facebook"><i class="fab fa-apple"></i> Continue with Apple</div>
+      </div>
+    </form>
+
+    <!-- Register Form -->
+    <form class="form" id="register">
+      <h2>Create Account</h2>
+      <input type="text" placeholder="Full Name" required>
+      <input type="text" placeholder="Email" required>
+      <input type="password" placeholder="Password" required>
+      <input type="password" placeholder="Confirm Password" required>
+      <button class="btn" type="submit">Register</button>
+
+      <div class="divider">or sign up with</div>
+
+      <div class="social-login">
+        <div class="social-btn google"><i class="fab fa-google"></i> Continue with Google</div>
+        <div class="social-btn microsoft"><i class="fab fa-microsoft"></i> Continue with Microsoft</div>
+        <div class="social-btn github"><i class="fa fa-phone"></i> Continue with Phone</div>
+        <div class="social-btn facebook"><i class="fab fa-apple"></i> Continue with Apple</div>
+      </div>
+    </form>
+  </div>
+
+  <script>
+    function showForm(formId) {
+      document.querySelectorAll('.form').forEach(form => form.classList.remove('active'));
+      document.querySelector(`#${formId}`).classList.add('active');
+      document.querySelectorAll('.tab').forEach(tab => tab.classList.remove('active'));
+      document.querySelector(`.tab[onclick="showForm('${formId}')"]`).classList.add('active');
+    }
+
+    const modeToggle = document.getElementById("modeToggle");
+    modeToggle.addEventListener("click", () => {
+      document.body.classList.toggle("dark");
+      modeToggle.innerHTML = document.body.classList.contains("dark") 
+        ? '<i class="fa-solid fa-sun"></i>' 
+        : '<i class="fa-solid fa-moon"></i>';
+    });
+  </script>
+</body>
+</html>

@@ -1,0 +1,2703 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>AFASA AI Assistant</title>
+  <link rel="stylesheet" href="style.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/animate.css/4.1.1/animate.min.css">
+  <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+  <style>
+      
+@import url('https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;500;600;700&family=Inter:wght@400;500;600;700&display=swap');
+
+/* Root Colors */
+:root {
+  --primary: #6366f1;
+  --primary-gradient-start: #6366f1;
+  --primary-gradient-end: #a855f7;
+  --secondary: #ec4899;
+  --dark-bg: #000000;
+  --dark-card: #121212;
+  --dark-msg: #1e1e1e;
+  --dark-text: #ffffff;
+  --dark-input: #2a2a2a;
+  
+  --light-bg: #f5f7fa;
+  --light-card: #ffffff;
+  --light-msg: #e0e0e0;
+  --light-text: #222;
+
+  --typing-dot: #ec4899;
+  --card-border-radius: 16px;
+  --message-border-radius: 12px;
+  --button-border-radius: 50%;
+  --input-border-radius: 24px;
+}
+
+body {
+  margin: 0;
+  font-family: 'Inter', sans-serif;
+  background: var(--dark-bg);
+  color: var(--dark-text);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  height: 100vh;
+  width: 100vw;
+  overflow: hidden;
+  transition: background 0.3s, color 0.3s;
+}
+html, body {
+  margin: 0;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  overflow: hidden; /* Prevent accidental scrollbars */
+}
+
+
+body.light-mode {
+  background: var(--light-bg);
+  color: var(--light-text);
+}
+
+/* Container - full full screen */
+.container {
+  position: fixed;    /* Stay locked to viewport */
+  inset: 0;           /* top:0; right:0; bottom:0; left:0 */
+  width: 500vw;       /* Full viewport width */
+  height: 100vh;      /* Basic height */
+  height: 100dvh;     /* Dynamic viewport height (modern browsers) */
+  height: 100svh;     /* Safe viewport height for mobile */
+
+  margin: 0;          /* Remove left offset */
+  padding: 0;
+
+  display: flex;
+  flex-direction: column;
+}
+
+.container.light-mode {
+  background: var(--light-card);
+}
+
+
+/* Header */
+.header {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem 1.5rem;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  font-weight: 600;
+  font-size: 1.3rem;
+  font-family: 'Poppins', sans-serif;
+  position: sticky;
+  top: 0;
+  z-index: 100;
+  animation: slideDown 0.5s ease-out;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.2);
+}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: rgba(18, 18, 18, 0.8);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.8);
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: all 0.2s ease;
+  font-family: 'Inter', sans-serif;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  backdrop-filter: blur(5px);
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.3);
+}
+.assistant-message .suggestions button i {
+  font-size: 0.9rem;
+  color: var(--secondary);
+}
+
+/* Add smooth scrolling to chatbox */
+.chatbox {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+  scroll-behavior: smooth;
+}
+
+/* Add hover effect to messages */
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: all 0.3s ease;
+}
+.chat-message:hover {
+  box-shadow: 0 6px 20px rgba(0,0,0,0.15);
+  transform: translateY(-2px);
+}
+
+@keyframes slideDown {
+  from { transform: translateY(-50px); opacity: 0; }
+  to { transform: translateY(0); opacity: 1; }
+}
+
+.header span {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  position: relative;
+}
+
+.header span::after {
+  content: '';
+  position: absolute;
+  bottom: -5px;
+  left: 0;
+  width: 40%;
+  height: 3px;
+  background: rgba(255, 255, 255, 0.5);
+  border-radius: 10px;
+  transition: width 0.3s ease;
+}
+
+.header span:hover::after {
+  width: 100%;
+}
+
+.mode-btn {
+  background: rgba(255,255,255,0.15);
+  border: none;
+  border-radius: 50%;
+  width: 40px;
+  height: 40px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  color: #fff;
+  transition: all 0.3s ease;
+  box-shadow: 0 2px 10px rgba(0,0,0,0.1);
+  backdrop-filter: blur(5px);
+}
+
+.mode-btn:hover { 
+  background: rgba(255,255,255,0.25); 
+  transform: translateY(-2px);
+  box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+}
+
+/* Chatbox */
+.chatbox {
+  flex: 1;
+  padding: 1.5rem;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  overflow-y: auto;
+  scrollbar-width: thin;
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 1rem 1.5rem;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+  position: sticky;
+  bottom: 0;
+  z-index: 100;
+  backdrop-filter: blur(10px);
+  -webkit-backdrop-filter: blur(10px);
+  box-shadow: 0 -2px 10px rgba(0,0,0,0.1);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 0.5rem;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+  position: sticky;
+  bottom: 0;
+  z-index: 99;
+}
+
+/* Responsive */
+@media(min-width: 1200px){
+  .container {
+    width: 90%;
+    max-width: 1200px;
+    height: 95vh;
+    border-radius: var(--card-border-radius);
+    box-shadow: 0 8px 40px rgba(0,0,0,0.6);
+  }
+}
+
+@media(max-width: 600px){
+  .header { 
+    padding: 0.8rem 1rem;
+    font-size: 1.1rem;
+  }
+  
+  .input-area {
+    padding: 0.8rem 1rem;
+  }
+  
+  .chatbox {
+    padding: 1rem;
+  }
+  
+  .assistant-message .suggestions { 
+    flex-direction: column; 
+  }
+  
+  .assistant-message .suggestions button { 
+    width: 100%; 
+  }
+}
+
+/* Personalized greeting styles */
+.greeting-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--primary);
+}
+
+/* Personalized greeting styles */
+.greeting-text {
+  font-size: 1.5rem;
+  font-weight: 600;
+  margin-bottom: 5px;
+  color: var(--primary);
+}
+
+.user-name {
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--secondary));
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+  font-weight: 700;
+}
+
+.help-text {
+  font-size: 1.2rem;
+  color: #888;
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+/* Scrollbar styling */
+.chatbox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbox::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.chatbox::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 10px;
+}
+
+.chatbox::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+.help-text {
+  font-size: 1.2rem;
+  color: #888;
+  margin-bottom: 20px;
+  margin-top: 5px;
+}
+
+/* Scrollbar styling */
+.chatbox::-webkit-scrollbar {
+  width: 6px;
+}
+
+.chatbox::-webkit-scrollbar-track {
+  background: rgba(0,0,0,0.1);
+  border-radius: 10px;
+}
+
+.chatbox::-webkit-scrollbar-thumb {
+  background: rgba(99, 102, 241, 0.5);
+  border-radius: 10px;
+}
+
+.chatbox::-webkit-scrollbar-thumb:hover {
+  background: rgba(99, 102, 241, 0.8);
+}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+
+.user-message {
+  align-self: flex-end;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: #fff;
+  border-bottom-right-radius: 4px;
+}
+
+.assistant-message {
+  align-self: flex-start;
+  background: var(--dark-msg);
+  color: var(--dark-text);
+  border-bottom-left-radius: 4px;
+}
+.assistant-message.light-mode {
+  background: var(--light-msg);
+  color: var(--light-text);
+}
+
+/* Suggestions */
+.assistant-message .suggestions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  margin-top: 15px;
+}
+.assistant-message .suggestions button {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  padding: 10px 16px;
+  border-radius: 12px;
+  border: none;
+  cursor: pointer;
+  font-size: 0.9rem;
+  background: var(--dark-input);
+  color: #fff;
+  transition: transform 0.2s, box-shadow 0.2s;
+  font-family: 'Inter', sans-serif;
+}
+.assistant-message .suggestions button:hover {
+  transform: scale(1.02);
+  box-shadow: 0 0 10px rgba(99, 102, 241, 0.3);
+}
+
+/* Typing */
+.typing-bubble { display: flex; gap: 4px; align-items: center; }
+.typing-dot {
+  width: 8px;
+  height: 8px;
+  background: var(--typing-dot);
+  border-radius: 50%;
+  animation: bounce 1s infinite;
+}
+.typing-dot:nth-child(2) { animation-delay: 0.2s; }
+.typing-dot:nth-child(3) { animation-delay: 0.4s; }
+@keyframes bounce {0%,80%,100%{transform:scale(0);}40%{transform:scale(1);}}
+@keyframes slideUp {from{opacity:0;transform:translateY(10px);}to{opacity:1;transform:translateY(0);}}
+
+/* Input */
+.input-area {
+  display: flex;
+  padding: 16px;
+  background: var(--dark-card);
+  gap: 12px;
+  border-top: 1px solid rgba(255,255,255,0.05);
+}
+.input-area.light-mode {
+  background: rgba(245,247,250,0.95);
+}
+
+.delete-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: var(--dark-input);
+  color: #888;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: all 0.2s ease;
+}
+/* Transparent, centered welcome card (no background), with modern suggestion cards */
+.welcome-card {
+  background: transparent !important;
+  box-shadow: none !important;
+  border: none !important;
+  align-self: center;
+  width: min(860px, calc(100% - 32px));
+  padding: 24px 16px;
+  text-align: center;
+}
+
+.welcome-card .greeting-text {
+  font-size: 2rem;
+  font-weight: 700;
+  margin-bottom: 6px;
+  font-family: 'Poppins', sans-serif;
+}
+
+.welcome-card .help-text {
+  font-size: 1.2rem;
+  color: #bdbdbd;
+  margin-top: 2px;
+  margin-bottom: 18px;
+  font-weight: 400;
+}
+
+.welcome-card .suggestions {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 16px;
+  justify-items: center;
+  margin-top: 10px;
+}
+
+/* Card-like suggestion buttons with icons */
+.welcome-card .suggestions button {
+  width: 100%;
+  max-width: 360px;
+  display: flex;
+  align-items: flex-start;
+  gap: 12px;
+  text-align: left;
+  border-radius: 16px;
+  padding: 14px 16px;
+  background: rgba(255,255,255,0.06);
+  border: 1px solid rgba(255,255,255,0.08);
+  color: #fff;
+  backdrop-filter: blur(8px);
+  box-shadow: 0 8px 18px rgba(0,0,0,0.15);
+  transition: transform 0.2s ease, box-shadow 0.2s ease, background 0.2s ease, border-color 0.2s ease;
+}
+
+.welcome-card .suggestions button i {
+  flex: 0 0 auto;
+  font-size: 1.1rem;
+  color: #fff;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  box-shadow: 0 6px 18px rgba(99, 102, 241, 0.35);
+}
+
+.welcome-card .suggestions button:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 16px 34px rgba(99, 102, 241, 0.25);
+  border-color: rgba(255,255,255,0.15);
+  background: rgba(255,255,255,0.08);
+}
+
+.welcome-card .suggestions button:active {
+  transform: translateY(-1px);
+}
+
+/* Light mode for the modern cards */
+body.light-mode .welcome-card .suggestions button {
+  background: #ffffff;
+  color: var(--light-text);
+  border-color: rgba(0,0,0,0.06);
+  box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+}
+
+body.light-mode .welcome-card .suggestions button:hover {
+  box-shadow: 0 14px 32px rgba(0,0,0,0.12);
+}
+
+/* Smooth removal animation class if needed elsewhere */
+.welcome-card.removing,
+.suggestions.removing {
+  opacity: 0;
+  transform: translateY(-10px);
+  transition: all 0.45s ease;
+}
+
+
+.delete-btn:hover {
+  color: #fff;
+  background: #444;
+}
+
+.input-area input {
+  flex: 1;
+  padding: 12px 20px;
+  border: none;
+  border-radius: var(--input-border-radius);
+  background: var(--dark-input);
+  color: #fff;
+  outline: none;
+  font-size: 1rem;
+  transition: background 0.3s, color 0.3s, box-shadow 0.3s;
+  font-family: 'Inter', sans-serif;
+}
+
+.input-area input:focus {
+  box-shadow: 0 0 0 2px rgba(99, 102, 241, 0.3);
+}
+
+.input-area.light-mode input {
+  background: #fff;
+  color: var(--light-text);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+}
+
+.input-area button#send-btn {
+  border: none;
+  border-radius: var(--button-border-radius);
+  width: 45px;
+  height: 45px;
+  background: linear-gradient(135deg, var(--primary-gradient-start), var(--primary-gradient-end));
+  color: white;
+  font-size: 1rem;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.input-area button#send-btn:hover {
+  transform: scale(1.05);
+  box-shadow: 0 0 15px rgba(99, 102, 241, 0.5);
+}
+
+/* Disclaimer */
+.disclaimer {
+  text-align: center;
+  font-size: 0.8rem;
+  padding: 10px;
+  color: #6C6C6C;
+  background: rgba(0,0,0,0.2);
+}
+
+/* Responsive */
+@media(max-width:600px){
+  .container { width: 100%; height: 100vh; border-radius: 0; }
+  .header { font-size: 1.2rem; }
+  .assistant-message .suggestions { flex-direction: column; }
+  .assistant-message .suggestions button { width: 100%; }
+}
+
+.chat-message {
+  padding: 14px 20px;
+  border-radius: var(--message-border-radius);
+  max-width: 70%;
+  word-wrap: break-word;
+  position: relative;
+  animation: slideUp 0.3s ease forwards;
+  box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+  transition: background 0.3s, color 0.3s;
+}
+  
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <span>
+        <i class="fas fa-robot"></i>
+        AFASA AI Assistant
+      </span>
+      <button class="mode-btn" id="mode-toggle">
+        <i class="fas fa-moon"></i>
+      </button>
+    </div>
+    
+    <div class="chatbox" id="chatbox">
+      <!-- Messages will appear here -->
+    </div>
+    
+    <div class="input-area">
+      <button id="delete-btn" class="delete-btn">
+        <i class="fas fa-trash"></i>
+      </button>
+      <input type="text" id="chat-input" placeholder="Enter a prompt here">
+      <button id="send-btn">
+        <i class="fas fa-paper-plane"></i>
+      </button>
+    </div>
+    
+    <div class="disclaimer">
+      AFASA may display inaccurate info, including about people, so double-check its responses.
+    </div>
+  </div>
+
+  <script>
+    const chatbox = document.getElementById('chatbox');
+    const chatInput = document.getElementById('chat-input');
+    const sendButton = document.getElementById('send-btn');
+    const deleteButton = document.getElementById('delete-btn');
+    const modeToggle = document.getElementById('mode-toggle');
+    const container = document.querySelector('.container');
+    const inputArea = document.querySelector('.input-area');
+    const body = document.body;
+
+    /**
+     * Smoothly fades out and removes the welcome card (greeting + help text + suggestions).
+     * This is triggered when user clicks a suggestion or sends the first message.
+     */
+    function removeWelcomeCard() {
+      const welcomeCard = document.querySelector('.welcome-card');
+      if (welcomeCard) {
+        welcomeCard.style.transition = 'all 0.4s ease-in-out';
+        welcomeCard.style.opacity = '0';
+        welcomeCard.style.transform = 'translateY(-12px)';
+        setTimeout(() => welcomeCard.remove(), 450);
+      }
+    }
+    // Toggle light/dark mode
+    modeToggle.addEventListener('click', () => {
+      body.classList.toggle('light-mode');
+      container.classList.toggle('light-mode');
+      inputArea.classList.toggle('light-mode');
+      
+      // Update all assistant messages
+      document.querySelectorAll('.assistant-message').forEach(msg => {
+        msg.classList.toggle('light-mode');
+      });
+      
+      // Toggle icon
+      const icon = modeToggle.querySelector('i');
+      if (icon.classList.contains('fa-moon')) {
+        icon.classList.replace('fa-moon', 'fa-sun');
+      } else {
+        icon.classList.replace('fa-sun', 'fa-moon');
+      }
+    });
+
+    function displayMessage(text, isUser, suggestions = []) {
+      const messageDiv = document.createElement('div');
+      messageDiv.classList.add('chat-message', isUser ? 'user-message' : 'assistant-message');
+      
+      // Apply light mode if active
+      if (!isUser && body.classList.contains('light-mode')) {
+        messageDiv.classList.add('light-mode');
+      }
+      
+      // Add animation
+      messageDiv.classList.add('animate__animated', 'animate__fadeIn');
+      
+      // Text content
+      messageDiv.textContent = text;
+      
+      // Add suggestion buttons if provided and not a user message
+      if (!isUser && suggestions.length > 0) {
+        const suggestionsDiv = document.createElement('div');
+        suggestionsDiv.classList.add('suggestions');
+        
+        // Icons for different suggestion types
+        const suggestionIcons = {
+          'How can I become': 'fas fa-graduation-cap',
+          'Create a roadmap': 'fas fa-map',
+          'Can you help me find': 'fas fa-search',
+          'Write a Javascript': 'fas fa-code',
+          'Tell me a joke': 'fas fa-laugh',
+          'What\'s the weather': 'fas fa-cloud-sun',
+          'Generate an image': 'fas fa-image',
+          'How can I help': 'fas fa-question-circle',
+          'default': 'fas fa-lightbulb'
+        };
+        
+        suggestions.forEach(suggestion => {
+          const button = document.createElement('button');
+          
+          // Find appropriate icon or use default
+          let iconClass = suggestionIcons.default;
+          for (const [key, value] of Object.entries(suggestionIcons)) {
+            if (suggestion.startsWith(key)) {
+              iconClass = value;
+              break;
+            }
+          }
+          
+          // Create icon element
+          const icon = document.createElement('i');
+          icon.className = iconClass;
+          
+          // Add icon and text to button
+          button.appendChild(icon);
+          button.appendChild(document.createTextNode(' ' + suggestion));
+          
+          button.addEventListener('click', () => {
+            // Store the suggestion text
+            const selectedSuggestion = suggestion;
+
+            // Fade out greeting + suggestions (welcome card) if present
+            removeWelcomeCard();
+
+            // Fade out any other suggestion groups currently visible
+            const allSuggestionContainers = document.querySelectorAll('.suggestions');
+
+            // Visual effect for clicked button
+            button.style.transform = 'scale(0.95)';
+            button.style.opacity = '0.8';
+
+            // Animate suggestions out
+            allSuggestionContainers.forEach(container => {
+              container.style.transition = 'all 0.5s ease';
+              container.style.opacity = '0';
+              container.style.transform = 'translateY(-20px)';
+              container.style.maxHeight = '0';
+              container.style.margin = '0';
+              container.style.padding = '0';
+              container.style.pointerEvents = 'none';
+            });
+
+            setTimeout(() => {
+              allSuggestionContainers.forEach(container => container.remove());
+              chatInput.value = selectedSuggestion;
+              sendButton.click();
+            }, 500);
+          });
+          suggestionsDiv.appendChild(button);
+        });
+        
+        messageDiv.appendChild(suggestionsDiv);
+      }
+      
+      chatbox.appendChild(messageDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }
+
+    function displayTyping() {
+      const typingDiv = document.createElement('div');
+      typingDiv.classList.add('chat-message', 'assistant-message', 'typing-message');
+      
+      // Apply light mode if active
+      if (body.classList.contains('light-mode')) {
+        typingDiv.classList.add('light-mode');
+      }
+      
+      const typingBubble = document.createElement('div');
+      typingBubble.classList.add('typing-bubble');
+      
+      for (let i = 0; i < 3; i++) {
+        const dot = document.createElement('div');
+        dot.classList.add('typing-dot');
+        typingBubble.appendChild(dot);
+      }
+      
+      typingDiv.appendChild(typingBubble);
+      chatbox.appendChild(typingDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+      
+      return typingDiv;
+    }
+
+    async function callApi(apiUrl, prompt) {
+      chatInput.value = "";
+      chatInput.disabled = true;
+      sendButton.disabled = true;
+      deleteButton.disabled = true;
+
+      // Add animation to send button
+      sendButton.classList.add('animate__animated', 'animate__bounceOut');
+      setTimeout(() => {
+        sendButton.classList.remove('animate__animated', 'animate__bounceOut');
+      }, 500);
+
+      const typingElem = displayTyping();
+
+      try {
+        const response = await fetch(apiUrl, {
+          method: 'POST',
+          headers: {'Content-Type': 'application/json'},
+          body: JSON.stringify({prompt})
+        });
+        const data = await response.json();
+
+        typingElem.remove();
+
+        chatInput.disabled = false;
+        sendButton.disabled = false;
+        deleteButton.disabled = false;
+        chatInput.focus();
+
+        // Add animation to send button when enabled
+        sendButton.classList.add('animate__animated', 'animate__bounceIn');
+        setTimeout(() => {
+          sendButton.classList.remove('animate__animated', 'animate__bounceIn');
+        }, 500);
+
+        if (data.status === 'success') {
+          // Progressive reveal for AI responses
+          const messageDiv = document.createElement('div');
+          messageDiv.classList.add('chat-message', 'assistant-message');
+          
+          // Apply light mode if active
+          if (body.classList.contains('light-mode')) {
+            messageDiv.classList.add('light-mode');
+          }
+          
+          // Add to chatbox immediately but empty
+          chatbox.appendChild(messageDiv);
+          chatbox.scrollTop = chatbox.scrollHeight;
+          
+          // Progressive typing effect
+          const text = data.text;
+          let charIndex = 0;
+          const typingSpeed = 10; // ms per character
+          
+          const typeWriter = () => {
+            if (charIndex < text.length) {
+              messageDiv.textContent += text.charAt(charIndex);
+              charIndex++;
+              chatbox.scrollTop = chatbox.scrollHeight;
+              setTimeout(typeWriter, typingSpeed);
+            } else {
+              // Add suggestion buttons after text is fully typed
+              if (data.suggestions && data.suggestions.length > 0) {
+                const suggestionsDiv = document.createElement('div');
+                suggestionsDiv.classList.add('suggestions', 'animate__animated', 'animate__fadeIn');
+                
+                // Icons for different suggestion types
+                const suggestionIcons = {
+                  'How can I become': 'fas fa-graduation-cap',
+                  'Create a roadmap': 'fas fa-map',
+                  'Can you help me find': 'fas fa-search',
+                  'Write a Javascript': 'fas fa-code',
+                  'Tell me a joke': 'fas fa-laugh',
+                  'What\'s the weather': 'fas fa-cloud-sun',
+                  'Generate an image': 'fas fa-image',
+                  'How can I help': 'fas fa-question-circle',
+                  'default': 'fas fa-lightbulb'
+                };
+                
+                data.suggestions.forEach(suggestion => {
+                  const button = document.createElement('button');
+                  
+                  // Find appropriate icon or use default
+                  let iconClass = suggestionIcons.default;
+                  for (const [key, value] of Object.entries(suggestionIcons)) {
+                    if (suggestion.startsWith(key)) {
+                      iconClass = value;
+                      break;
+                    }
+                  }
+                  
+                  // Create icon element
+                  const icon = document.createElement('i');
+                  icon.className = iconClass;
+                  
+                  // Add icon and text to button
+                  button.appendChild(icon);
+                  button.appendChild(document.createTextNode(' ' + suggestion));
+                  
+                  button.addEventListener('click', () => {
+                    // Store the selected suggestion
+                    const selectedSuggestion = suggestion;
+                    
+                    // Fade out greeting + suggestions (welcome card) if present
+                    removeWelcomeCard();
+                    
+                    // Fade out any suggestion groups currently visible
+                    const allSuggestionContainers = document.querySelectorAll('.suggestions');
+                    
+                    // Visual effect for clicked button
+                    button.style.transform = 'scale(0.95)';
+                    button.style.opacity = '0.8';
+                    
+                    // Animate suggestions out
+                    allSuggestionContainers.forEach(container => {
+                      container.style.transition = 'all 0.5s ease';
+                      container.style.opacity = '0';
+                      container.style.transform = 'translateY(-20px)';
+                      container.style.maxHeight = '0';
+                      container.style.margin = '0';
+                      container.style.padding = '0';
+                      container.style.pointerEvents = 'none';
+                    });
+                    
+                    // After animation completes, remove all suggestion containers
+                    setTimeout(() => {
+                      allSuggestionContainers.forEach(container => {
+                        container.remove();
+                      });
+                      
+                      // Set the input value to the selected suggestion
+                      chatInput.value = selectedSuggestion;
+                      
+                      // Trigger the send button click
+                      sendButton.click();
+                    }, 500);
+                  });
+                  suggestionsDiv.appendChild(button);
+                });
+                
+                messageDiv.appendChild(suggestionsDiv);
+                chatbox.scrollTop = chatbox.scrollHeight;
+              }
+            }
+          };
+          
+          typeWriter();
+        } else {
+          displayMessage('❌ An error occurred. Please try again.', false);
+        }
+      } catch (error) {
+        console.error(error);
+        typingElem.remove();
+        displayMessage('❌ An error occurred. Please try again.', false);
+        chatInput.disabled = false;
+        sendButton.disabled = false;
+        deleteButton.disabled = false;
+      }
+    }
+
+    // Welcome message with animation delay
+    setTimeout(() => {
+      const welcomeDiv = document.createElement('div');
+      welcomeDiv.classList.add('chat-message', 'assistant-message');
+      
+      // Mark as a transparent, centered welcome card
+      welcomeDiv.classList.add('welcome-card');
+      
+      // Apply light mode if active
+      if (body.classList.contains('light-mode')) {
+        welcomeDiv.classList.add('light-mode');
+      }
+      
+      // Add animation
+      welcomeDiv.classList.add('animate__animated', 'animate__fadeIn');
+      
+      // Create personalized greeting with colored name
+      const greeting = document.createElement('div');
+      greeting.innerHTML = '<span class="greeting-text">Hello, <span class="user-name">AFASA</span></span>';
+      welcomeDiv.appendChild(greeting);
+      
+      // Add help text
+      const helpText = document.createElement('div');
+      helpText.textContent = "How Can I help you today?";
+      helpText.classList.add('help-text');
+      welcomeDiv.appendChild(helpText);
+      
+      // Add suggestions
+      const suggestions = [
+        "How can I become a FullStack Developer in 2024", 
+        "Create a roadmap to learn ReactJs in 2024", 
+        "Can you help me find the latest news on Web Development", 
+        "Write a Javascript code to print the even numbers in an array"
+      ];
+      
+      const suggestionsDiv = document.createElement('div');
+      suggestionsDiv.classList.add('suggestions'); // styled as centered grid in CSS
+      
+      // Icons for different suggestion types
+      const suggestionIcons = {
+        'How can I become': 'fas fa-graduation-cap',
+        'Create a roadmap': 'fas fa-map',
+        'Can you help me find': 'fas fa-search',
+        'Write a Javascript': 'fas fa-code',
+        'default': 'fas fa-lightbulb'
+      };
+      
+      suggestions.forEach(suggestion => {
+        const button = document.createElement('button');
+        
+        // Find appropriate icon or use default
+        let iconClass = suggestionIcons.default;
+        for (const [key, value] of Object.entries(suggestionIcons)) {
+          if (suggestion.startsWith(key)) {
+            iconClass = value;
+            break;
+          }
+        }
+        
+        // Create icon element
+        const icon = document.createElement('i');
+        icon.className = iconClass;
+        
+        // Add icon and text to button
+        button.appendChild(icon);
+        button.appendChild(document.createTextNode(' ' + suggestion));
+        
+        button.addEventListener('click', () => {
+          // Store the selected suggestion
+          const selectedSuggestion = suggestion;
+          
+          // Find all suggestion containers
+          const allSuggestionContainers = document.querySelectorAll('.suggestions');
+          
+          // Create a visual effect for the clicked button
+          button.style.transform = 'scale(0.95)';
+          button.style.opacity = '0.8';
+          
+          // Manually animate each suggestion container
+          allSuggestionContainers.forEach(container => {
+            container.style.transition = 'all 0.5s ease';
+            container.style.opacity = '0';
+            container.style.transform = 'translateY(-20px)';
+            container.style.maxHeight = '0';
+            container.style.margin = '0';
+            container.style.padding = '0';
+            container.style.pointerEvents = 'none';
+          });
+          
+          // After animation completes, remove all suggestion containers
+          setTimeout(() => {
+            allSuggestionContainers.forEach(container => {
+              container.remove();
+            });
+            
+            // Set the input value to the selected suggestion
+            chatInput.value = selectedSuggestion;
+            
+            // Trigger the send button click
+            sendButton.click();
+          }, 500);
+        });
+        suggestionsDiv.appendChild(button);
+      });
+      
+      welcomeDiv.appendChild(suggestionsDiv);
+      chatbox.appendChild(welcomeDiv);
+      chatbox.scrollTop = chatbox.scrollHeight;
+    }, 800);
+
+    chatInput.focus();
+
+    // Add event listener for Enter key
+    chatInput.addEventListener('keypress', (e) => {
+      if (e.key === 'Enter') {
+        sendButton.click();
+      }
+    });
+
+    // Add animation to input field on focus
+    chatInput.addEventListener('focus', () => {
+      chatInput.classList.add('animate__animated', 'animate__pulse');
+      setTimeout(() => {
+        chatInput.classList.remove('animate__animated', 'animate__pulse');
+      }, 500);
+    });
+
+    sendButton.addEventListener('click', async () => {
+      const message = chatInput.value.trim();
+      if(!message) return;
+
+      // If the user starts chat, fade out the welcome card (greeting + suggestions)
+      removeWelcomeCard();
+
+      displayMessage(message, true);
+      chatInput.value = '';
+
+      const apiUrl = message.startsWith('/image') ? 
+        'https://backend.buildpicoapps.com/aero/run/image-generation-api?pk=v1-Z0FBQUFBQm5IZkJDMlNyYUVUTjIyZVN3UWFNX3BFTU85SWpCM2NUMUk3T2dxejhLSzBhNWNMMXNzZlp3c09BSTR6YW1Sc1BmdGNTVk1GY0liT1RoWDZZX1lNZlZ0Z1dqd3c9PQ==' : 
+        'https://backend.buildpicoapps.com/aero/run/llm-api?pk=v1-Z0FBQUFBQm5IZkJDMlNyYUVUTjIyZVN3UWFNX3BFTU85SWpCM2NUMUk3T2dxejhLSzBhNWNMMXNzZlp3c09BSTR6YW1Sc1BmdGNTVk1GY0liT1RoWDZZX1lNZlZ0Z1dqd3c9PQ==';
+
+      callApi(apiUrl, message);
+    });
+
+    // Delete last message with animation
+    deleteButton.addEventListener('click', () => {
+      const messages = chatbox.querySelectorAll('.chat-message');
+      if(messages.length > 0) {
+        const lastMessage = messages[messages.length - 1];
+        lastMessage.classList.add('animate__animated', 'animate__fadeOutDown');
+        
+        // Add animation to delete button
+        deleteButton.classList.add('animate__animated', 'animate__headShake');
+        
+        setTimeout(() => {
+          lastMessage.remove();
+          deleteButton.classList.remove('animate__animated', 'animate__headShake');
+        }, 500);
+      }
+    });
+    // Add this at the beginning of your script section
+const adjustHeight = () => {
+  const vh = window.innerHeight * 0.01;
+  document.documentElement.style.setProperty('--vh', `${vh}px`);
+  
+  // Ensure chatbox takes exactly the right amount of space
+  const chatbox = document.getElementById('chatbox');
+  const header = document.querySelector('.header');
+  const inputArea = document.querySelector('.input-area');
+  const disclaimer = document.querySelector('.disclaimer');
+  
+  const availableHeight = window.innerHeight - header.offsetHeight - inputArea.offsetHeight - disclaimer.offsetHeight;
+  chatbox.style.height = `${availableHeight}px`;
+};
+
+// Run on page load
+adjustHeight();
+
+// Run on resize
+window.addEventListener('resize', adjustHeight);
+
+  </script>
+</body>
+</html>
+
+
